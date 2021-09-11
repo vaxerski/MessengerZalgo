@@ -69,8 +69,18 @@ std::string createZalgoArm(const bool bUp) {
 std::string createZalgo(std::string szInput) {
     std::string output = "";
 
-    for (const char c : szInput) {
+    for (uint64_t i = 0; i < szInput.length(); ++i) {
+        const char c = szInput[i];
         output += c;
+
+        // check if the char is wide
+        if((uint8_t)c >> 7 == 1) {
+            // wide char, let's see if the next char is a header char.
+            if ((((uint8_t)szInput[i + 1]) >> 6) != 0b11) {
+                // it is NOT, we skip the current one so as to not break the char.
+                continue;
+            }
+        }
 
         output += createZalgoArm(true);
         output += createZalgoArm(false);
