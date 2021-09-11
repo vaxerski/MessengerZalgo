@@ -6,7 +6,11 @@ Facebook's "Messenger" on Android doesn't scissor the zalgo characters resulting
 ![Demonstration](https://i.ibb.co/Ryv8KQn/Screenshot-20210910-194239-Messenger2.jpg)
 
 ## System
-Made on Linux, but should work on windows as well if you compile for win i guess :)
+Made for Linux.
+
+To make it work for windows, you need to patch the saving method. exec() will not work, and echo "" > file won't either.
+
+*Feel free to make a PR for windows compatibility, make sure to mark windows source as* `#ifdef WIN32` *to make the same source compile on linux and windows.*
 
 
 <br/>
