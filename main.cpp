@@ -20,15 +20,15 @@ uint iSpread        = 200;
 //
 
 // Random
-std::default_random_engine defaultRandomEngine;
+std::random_device         randomDevice;
+std::default_random_engine defaultRandomEngine(randomDevice());
 //
 
 // Execute a shell command and get the output
-std::string exec(const char *cmd)
-{
+std::string exec(const char* cmd) {
     std::array<char, 128> buffer;
     std::string result;
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    const std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
     if (!pipe) {
         std::cout << "exec failed in pipe.\n";
         return "";
@@ -39,18 +39,16 @@ std::string exec(const char *cmd)
     return result;
 }
 
-std::string createZalgoArm(const bool bUp)
-{
-
-    std::string output = "";
-    const std::vector<std::string> *pCharVec = bUp ? &zalgoCharactersUp : &zalgoCharactersDown;
+std::string createZalgoArm(const bool bUp) {
+    std::string                         output      = "";
+    const std::vector<std::string>*     pCharVec    = bUp ? &zalgoCharactersUp : &zalgoCharactersDown;
     
-    std::uniform_int_distribution<int> distributionArmLength(iMinLength, iMinLength + iSpread);
-    std::uniform_int_distribution<int> distributionSwitch(0, iSwitch);
-    std::uniform_int_distribution<int> distributionChar(0, pCharVec->size() - 1);
+    std::uniform_int_distribution<int>  distributionArmLength(iMinLength, iMinLength + iSpread);
+    std::uniform_int_distribution<int>  distributionSwitch(0, iSwitch);
+    std::uniform_int_distribution<int>  distributionChar(0, pCharVec->size() - 1);
 
-    int64_t currentChar = distributionChar(defaultRandomEngine);
-    int64_t armLength = distributionArmLength(defaultRandomEngine);
+    int64_t currentChar     = distributionChar(defaultRandomEngine);
+    const int64_t armLength = distributionArmLength(defaultRandomEngine);
 
     if(armLength < 0) {
         std::cout << "Arm length < 0, aborting.\n";
@@ -71,8 +69,7 @@ std::string createZalgoArm(const bool bUp)
 std::string createZalgo(std::string szInput) {
     std::string output = "";
 
-    for (const char c : szInput)
-    {
+    for (const char c : szInput) {
         output += c;
 
         output += createZalgoArm(true);
@@ -92,20 +89,14 @@ void printHelp() {
 <message>\n";
 }
 
-int main(int argc, char *argv[]) {
-    srand(time(NULL));
-
-    if (argc == 1) {
-        std::cout << "Use --help for usage.";
-        return 1;
-    }
-
-    // Parse params
-    std::string input = "";
+// Parses params, returns the message
+// and sets other global vars.
+std::string parseParams(int argc, char* argv[]) {
     std::string currentParam = "";
+    std::string input = "";
 
     for (int i = 1; i < argc; ++i) {
-        std::string param = argv[i];
+        const std::string param = argv[i];
 
         if (param.find('-') == 0) {
             currentParam = param;
@@ -113,7 +104,7 @@ int main(int argc, char *argv[]) {
             if (currentParam == "-h" || currentParam == "--help") {
                 // print help
                 printHelp();
-                return 0;
+                return "";
             }
 
             continue;
@@ -124,7 +115,7 @@ int main(int argc, char *argv[]) {
                 iMinLength = stoi(param);
             } catch (...) {
                 std::cout << "Invalid parameter: " << param << "! expected uint";
-                return 1;
+                return "";
             }
 
             currentParam = "";
@@ -136,7 +127,7 @@ int main(int argc, char *argv[]) {
                 iSpread = stoi(param);
             } catch (...) {
                 std::cout << "Invalid parameter: " << param << "! expected uint";
-                return 1;
+                return "";
             }
 
             currentParam = "";
@@ -148,7 +139,7 @@ int main(int argc, char *argv[]) {
                 iSwitch = stoi(param);
             } catch (...) {
                 std::cout << "Invalid parameter: " << param << "! expected uint";
-                return 1;
+                return "";
             }
 
             currentParam = "";
@@ -156,16 +147,37 @@ int main(int argc, char *argv[]) {
         }
 
         // No param, add to input
-        input += param;
-        input += " ";
+        input += (std::string)(param + " ");
     }
 
-    std::string output = createZalgo(input);
+    return input;
+}
 
+int main(int argc, char* argv[]) {
+    srand(time(NULL));
+
+    if (argc == 1) {
+        // No arguments, give a --help hint.
+        std::cout << "Use --help for usage.\n";
+        return 1;
+    }
+
+    // Parse params
+    const std::string input = parseParams(argc, argv);
+
+    if (input == "")
+        return 1; // Some error occurred or no input given, ignore.
+                  // If there really was an error it's prolly been already printed.
+                  // If the user just didnt pass a message, then well they will get an empty output, what did they expect?
+
+    const std::string output = createZalgo(input);
+
+    // get the working dir with pwd
     std::string workingDir = exec("pwd");
     workingDir = workingDir.substr(0, workingDir.length() - 1);
 
-    std::string writeResult = exec(((std::string)("echo \"" + output + "\" > \"" + workingDir + "/messengerZalgoOutput.txt\"")).c_str());
+    // write the output to a file with echo "out" > file
+    exec(((std::string)("echo \"" + output + "\" > \"" + workingDir + "/messengerZalgoOutput.txt\"")).c_str());
 
     std::cout << "Done! Result written to ./messengerZalgoOutput.txt. Size: " << output.length() << " characters.\n";
 
