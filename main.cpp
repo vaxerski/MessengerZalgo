@@ -29,13 +29,11 @@ std::string exec(const char *cmd)
     std::array<char, 128> buffer;
     std::string result;
     std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
-    if (!pipe)
-    {
+    if (!pipe) {
         std::cout << "exec failed in pipe.\n";
         return "";
     }
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
-    {
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
         result += buffer.data();
     }
     return result;
@@ -59,8 +57,7 @@ std::string createZalgoArm(const bool bUp)
         return "";
     }
 
-    for (uint32_t i = 0; i < armLength; ++i)
-    {
+    for (uint32_t i = 0; i < armLength; ++i) {
         if(distributionSwitch(defaultRandomEngine) == 0) {
             currentChar = distributionChar(defaultRandomEngine);
         }
@@ -71,8 +68,7 @@ std::string createZalgoArm(const bool bUp)
     return output;
 }
 
-std::string createZalgo(std::string szInput)
-{
+std::string createZalgo(std::string szInput) {
     std::string output = "";
 
     for (const char c : szInput)
@@ -96,12 +92,10 @@ void printHelp() {
 <message>\n";
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     srand(time(NULL));
 
-    if (argc == 1)
-    {
+    if (argc == 1) {
         std::cout << "Use --help for usage.";
         return 1;
     }
@@ -110,8 +104,7 @@ int main(int argc, char *argv[])
     std::string input = "";
     std::string currentParam = "";
 
-    for (int i = 1; i < argc; ++i)
-    {
+    for (int i = 1; i < argc; ++i) {
         std::string param = argv[i];
 
         if (param.find('-') == 0) {
@@ -127,12 +120,9 @@ int main(int argc, char *argv[])
         }
 
         if (currentParam == "-m" || currentParam == "--min-length") {
-            try
-            {
+            try {
                 iMinLength = stoi(param);
-            }
-            catch (...)
-            {
+            } catch (...) {
                 std::cout << "Invalid parameter: " << param << "! expected uint";
                 return 1;
             }
@@ -142,12 +132,9 @@ int main(int argc, char *argv[])
         }
 
         if (currentParam == "-r" || currentParam == "--spread") {
-            try
-            {
+            try {
                 iSpread = stoi(param);
-            }
-            catch (...)
-            {
+            } catch (...) {
                 std::cout << "Invalid parameter: " << param << "! expected uint";
                 return 1;
             }
@@ -157,12 +144,9 @@ int main(int argc, char *argv[])
         }
 
         if (currentParam == "-s" || currentParam == "--switch-every") {
-            try
-            {
+            try {
                 iSwitch = stoi(param);
-            }
-            catch (...)
-            {
+            } catch (...) {
                 std::cout << "Invalid parameter: " << param << "! expected uint";
                 return 1;
             }
