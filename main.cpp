@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) {
     if (file != "") {
       // write the output to a file with echo "out" > file
       exec(((std::string)("echo \"" + output + "\" > \"" + workingDir + "/" + file + "\"")).c_str());
-      std::cout << "Done! Result written to ./messengerZalgoOutput.txt. Size: " << output.length() << " characters.\n";
+      std::cout << "Done! Result written to ./" << file << ". Size: " << output.length() << " characters.\n";
     }
     else {
       std::cout << output;
