@@ -17,6 +17,7 @@ std::vector<std::string> zalgoCharactersDown = {"ࣧ", "ࣧ", "ܻ", "݆", "ࣩ",
 uint iSwitch        = 8;
 uint iMinLength     = 150;
 uint iSpread        = 200;
+std::string file    = "";
 //
 
 // Random
@@ -95,6 +96,7 @@ void printHelp() {
     -m / --min-length => minimum arm length. \n\
     -r / --spread => arm length spread (min + spread = max). \n\
     -s / --switch-every => switch the character every x average repeats.\n\
+    -o / --output => write to a file instead of standard out.\n\
 \n\
 <message>\n";
 }
@@ -156,6 +158,18 @@ std::string parseParams(int argc, char* argv[]) {
             continue;
         }
 
+        if (currentParam == "-o" || currentParam == "--output") {
+            try {
+                file = param;
+            } catch (...) {
+                std::cout << "Invalid parameter: " << param << "! expected string";
+                return "";
+            }
+
+            currentParam = "";
+            continue;
+        }
+
         // No param, add to input
         input += (std::string)(param + " ");
     }
@@ -186,10 +200,15 @@ int main(int argc, char* argv[]) {
     std::string workingDir = exec("pwd");
     workingDir = workingDir.substr(0, workingDir.length() - 1);
 
-    // write the output to a file with echo "out" > file
-    exec(((std::string)("echo \"" + output + "\" > \"" + workingDir + "/messengerZalgoOutput.txt\"")).c_str());
-
-    std::cout << "Done! Result written to ./messengerZalgoOutput.txt. Size: " << output.length() << " characters.\n";
+    //write the output to a file if the file variable is not empty
+    if (file != "") {
+      // write the output to a file with echo "out" > file
+      exec(((std::string)("echo \"" + output + "\" > \"" + workingDir + "/" + file + "\"")).c_str());
+      std::cout << "Done! Result written to ./messengerZalgoOutput.txt. Size: " << output.length() << " characters.\n";
+    }
+    else {
+      std::cout << output;
+    }
 
     return 0;
 }
