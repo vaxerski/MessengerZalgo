@@ -17,7 +17,7 @@ std::vector<std::string> zalgoCharactersDown = {"ࣧ", "ࣧ", "ܻ", "݆", "ࣩ",
 uint iSwitch        = 8;
 uint iMinLength     = 150;
 uint iSpread        = 200;
-std::string file    = "";
+std::string szFile  = "";
 
 uint iLimitTo       = 0;
 //
@@ -168,12 +168,7 @@ std::string parseParams(int argc, char* argv[]) {
         }
 
         if (currentParam == "-o" || currentParam == "--output") {
-            try {
-                file = param;
-            } catch (...) {
-                std::cout << "Invalid parameter: " << param << "! expected string";
-                return "";
-            }
+            szFile = param;
 
             currentParam = "";
             continue;
@@ -222,10 +217,10 @@ int main(int argc, char* argv[]) {
     workingDir = workingDir.substr(0, workingDir.length() - 1);
 
     //write the output to a file if the file variable is not empty
-    if (file != "") {
+    if (szFile != "") {
       // write the output to a file with echo "out" > file
-      exec(((std::string)("echo \"" + output + "\" > \"" + workingDir + "/" + file + "\"")).c_str());
-      std::cout << "Done! Result written to ./" << file << ". Size: " << output.length() << " bytes.\n";
+      exec(((std::string)("echo \"" + output + "\" > \"" + workingDir + "/" + szFile + "\"")).c_str());
+      std::cout << "Done! Result written to ./" << szFile << ". Size: " << output.length() << " bytes.\n";
     }
     else {
       std::cout << output;
