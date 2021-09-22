@@ -18,6 +18,8 @@ uint iSwitch        = 8;
 uint iMinLength     = 150;
 uint iSpread        = 200;
 std::string file    = "";
+
+uint iLimitTo       = 0;
 //
 
 // Random
@@ -70,6 +72,12 @@ std::string createZalgoArm(const bool bUp) {
 std::string createZalgo(std::string szInput) {
     std::string output = "";
 
+    // create the appropriate length if iLimitTo is set
+    if(iLimitTo) {
+        iSpread = 0;
+        iMinLength = (int)((iLimitTo - szInput.size()) / szInput.size()) / 2;
+    }
+
     for (uint64_t i = 0; i < szInput.length(); ++i) {
         const char c = szInput[i];
         output += c;
@@ -97,6 +105,7 @@ void printHelp() {
     -r / --spread => arm length spread (min + spread = max). \n\
     -s / --switch-every => switch the character every x average repeats.\n\
     -o / --output => write to a file instead of standard out.\n\
+    -l / --limit => smart limit the amount of characters to the specified amount (overwrites -m and -r)\n\
 \n\
 <message>\n";
 }
@@ -170,6 +179,18 @@ std::string parseParams(int argc, char* argv[]) {
             continue;
         }
 
+        if (currentParam == "-l" || currentParam == "--limit") {
+            try {
+                iLimitTo = stoi(param);
+            } catch (...) {
+                std::cout << "Invalid parameter: " << param << "! expected uint";
+                return "";
+            }
+
+            currentParam = "";
+            continue;
+        }
+
         // No param, add to input
         input += (std::string)(param + " ");
     }
@@ -204,7 +225,7 @@ int main(int argc, char* argv[]) {
     if (file != "") {
       // write the output to a file with echo "out" > file
       exec(((std::string)("echo \"" + output + "\" > \"" + workingDir + "/" + file + "\"")).c_str());
-      std::cout << "Done! Result written to ./" << file << ". Size: " << output.length() << " characters.\n";
+      std::cout << "Done! Result written to ./" << file << ". Size: " << output.length() << " bytes.\n";
     }
     else {
       std::cout << output;
